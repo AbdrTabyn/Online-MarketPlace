@@ -6,7 +6,6 @@ import visitor.TaxVisitor;
 
 public class PriceChangeHandler implements Observer<Event> {
     private final Catalog catalog;
-
     public PriceChangeHandler(Catalog catalog) {
         this.catalog = catalog;
     }
@@ -21,9 +20,12 @@ public class PriceChangeHandler implements Observer<Event> {
             for (Subcategory sub : category.getSubcategories()) {
                 for (CatalogElement product : sub.getProducts()) {
 
-                    if (getProductName(product)
-                            .equals(event.getProductName())) {
-                        double tax = product.accept(new TaxVisitor());
+                    if (getProductName(product).equals(event.getProductName())) {
+
+                        double newPrice = event.getNewValue();
+                        CatalogElement updatedProduct = copyWithNewPrice(product, newPrice);
+
+                        double tax = updatedProduct.accept(new TaxVisitor());
 
                         System.out.println(
                                 "Visitor triggered for "
@@ -36,20 +38,31 @@ public class PriceChangeHandler implements Observer<Event> {
             }
         }
     }
-
-    private String getProductName(CatalogElement product) {
+    private CatalogElement copyWithNewPrice(CatalogElement product, double price) {
         if (product instanceof PhysicalProduct p) {
-            return p.getName();
+            return new PhysicalProduct(p.getName(), price, p.getWeight());
         }
         if (product instanceof DigitalProduct p) {
-            return p.getName();
+            return new DigitalProduct(p.getName(), price);
         }
         if (product instanceof ServiceProduct p) {
-            return p.getName();
+            return new ServiceProduct(p.getName(), price);
         }
         if (product instanceof SubscriptionProduct p) {
-            return p.getName();
+            return new SubscriptionProduct(p.getName(), price, p.getMonths());
         }
+        if (product instanceof GiftCardProduct p) {
+            return new GiftCardProduct(p.getName(), price);
+        }
+        throw new IllegalArgumentException("Unknown product type");
+    }
+
+    private String getProductName(CatalogElement product) {
+        if (product instanceof PhysicalProduct p) return p.getName();
+        if (product instanceof DigitalProduct p) return p.getName();
+        if (product instanceof ServiceProduct p) return p.getName();
+        if (product instanceof SubscriptionProduct p) return p.getName();
+        if (product instanceof GiftCardProduct p) return p.getName();
         return "";
     }
 }
