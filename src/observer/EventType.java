@@ -1,4 +1,7 @@
 package observer;
 
-public class EventType {
+public enum EventType {
+    PRICE_CHANGED,
+    STOCK_CHANGED,
+    MARKETPLACE_SUMMARY
 }
