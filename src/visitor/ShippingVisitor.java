@@ -51,4 +51,9 @@ public class ShippingVisitor implements Visitor<Double> {
     public Double visit(SubscriptionProduct product) {
         return 0.0;
     }
+
+    @Override
+    public Double visit(GiftCardProduct product) {
+        return 0.0;
+    }
 }

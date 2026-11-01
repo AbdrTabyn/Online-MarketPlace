@@ -48,4 +48,9 @@ public class TaxVisitor implements Visitor<Double> {
     public Double visit(SubscriptionProduct product) {
         return product.getPrice() * 0.05;
     }
+
+    @Override
+    public Double visit(GiftCardProduct product) {
+        return product.getPrice() * 0.05;
+    }
 }

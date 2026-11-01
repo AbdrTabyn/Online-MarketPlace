@@ -9,4 +9,5 @@ public interface Visitor<R> {
     R visit(DigitalProduct product);
     R visit(ServiceProduct product);
     R visit(SubscriptionProduct product);
+    R visit(GiftCardProduct product);
 }

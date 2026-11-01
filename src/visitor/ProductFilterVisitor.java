@@ -66,4 +66,15 @@ public class ProductFilterVisitor implements Visitor<List<String>> {
         }
         return List.of();
     }
+
+    @Override
+    public List<String> visit(GiftCardProduct product) {
+        List<String> result = new ArrayList<>();
+
+        if (product.getPrice() <= maxPrice) {
+            result.add(product.getName());
+        }
+
+        return result;
+    }
 }

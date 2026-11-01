@@ -84,4 +84,11 @@ public class XmlExportVisitor implements Visitor<String> {
                 .replace(">", "&gt;")
                 .replace("'", "&apos;");
     }
+
+    @Override
+    public String visit(GiftCardProduct product) {
+        return "<giftCard name=\"" + product.getName()
+                + "\" price=\"" + product.getPrice()
+                + "\" />\n";
+    }
 }
