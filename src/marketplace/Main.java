@@ -54,35 +54,37 @@ public class Main {
 
         System.out.println("--- Observer ---");
 
-        EventPublisher publisher = new EventPublisher();
+        EventPublisher pricePublisher = new EventPublisher();
+        EventPublisher stockPublisher = new EventPublisher();
 
-        PriceService priceService = new PriceService(publisher);
-        StockService stockService = new StockService(publisher);
+        PriceService priceService = new PriceService(pricePublisher);
+        StockService stockService = new StockService(stockPublisher);
 
         WishlistNotifier wishlist = new WishlistNotifier();
         PriceDropAlert priceAlert = new PriceDropAlert();
 
-        publisher.subscribe(EventType.PRICE_CHANGED, wishlist);
-        publisher.subscribe(EventType.PRICE_CHANGED, priceAlert);
+        pricePublisher.subscribe(EventType.PRICE_CHANGED, wishlist);
+        pricePublisher.subscribe(EventType.PRICE_CHANGED, priceAlert);
 
 
         AnalyticsListener analytics = new AnalyticsListener();
         CacheListener cache = new CacheListener();
         MarketplaceAggregator aggregator =
-                new MarketplaceAggregator(publisher);
+                new MarketplaceAggregator(pricePublisher);
 
         cache.addToCache("Phone");
 
-        publisher.subscribe(EventType.PRICE_CHANGED, analytics);
-        publisher.subscribe(EventType.STOCK_CHANGED, analytics);
 
-        publisher.subscribe(EventType.PRICE_CHANGED, cache);
-        publisher.subscribe(EventType.STOCK_CHANGED, cache);
+        pricePublisher.subscribe(EventType.PRICE_CHANGED, analytics);
+        stockPublisher.subscribe(EventType.STOCK_CHANGED, analytics);
 
-        publisher.subscribe(EventType.PRICE_CHANGED, aggregator);
-        publisher.subscribe(EventType.STOCK_CHANGED, aggregator);
+        pricePublisher.subscribe(EventType.PRICE_CHANGED, cache);
+        stockPublisher.subscribe(EventType.STOCK_CHANGED, cache);
 
-        publisher.subscribe(EventType.MARKETPLACE_SUMMARY,
+        pricePublisher.subscribe(EventType.PRICE_CHANGED, aggregator);
+        stockPublisher.subscribe(EventType.STOCK_CHANGED, aggregator);
+
+        pricePublisher.subscribe(EventType.MARKETPLACE_SUMMARY,
                 event -> System.out.println(
                         "Summary: total changes = " + (int) event.getNewValue()
                 ));
@@ -91,7 +93,7 @@ public class Main {
         priceService.setPrice("Phone", 1000);
         PriceChangeHandler priceHandler = new PriceChangeHandler(catalog);
 
-        publisher.subscribe(EventType.PRICE_CHANGED, priceHandler);
+        pricePublisher.subscribe(EventType.PRICE_CHANGED, priceHandler);
         priceService.setPrice("Phone", 800);
 
         stockService.setStock("Phone", 10);
@@ -132,6 +134,5 @@ public class Main {
         System.out.println(
                 "Actual events: " + stressAnalytics.getEventCount()
         );
-
     }
 }
