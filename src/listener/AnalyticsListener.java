@@ -9,12 +9,7 @@ public class AnalyticsListener implements Observer<Event> {
 
     @Override
     public void onEvent(Event event) {
-        int count = eventCount.incrementAndGet();
-
-        System.out.println(
-                "Analytics: " + event.getType()
-                        + " recorded. Total events: " + count
-        );
+        eventCount.incrementAndGet();
     }
     public int getEventCount() {
         return eventCount.get();
