@@ -1,7 +1,7 @@
 package observer;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PriceService {
     private final EventPublisher publisher;
@@ -12,17 +12,21 @@ public class PriceService {
     }
 
     public void setPrice(String productName, double newPrice) {
-        if (newPrice < 0) {
-            throw new IllegalArgumentException("Price cannot be negative");
+        if (newPrice < 0 || !Double.isFinite(newPrice)) {
+            throw new IllegalArgumentException("Invalid price");
         }
-        Double oldPrice = prices.put(productName, newPrice);
+        final Double[] previous = new Double[1];
+        prices.compute(productName, (name, oldPrice) -> {
+            previous[0] = oldPrice;
+            return newPrice;
+        });
 
-        if (oldPrice != null && oldPrice != newPrice) {
+        if (previous[0] != null && previous[0] != newPrice) {
             publisher.notifyObservers(
                     new Event(
                             EventType.PRICE_CHANGED,
                             productName,
-                            oldPrice,
+                            previous[0],
                             newPrice
                     )
             );
@@ -30,5 +34,9 @@ public class PriceService {
     }
     public double getPrice(String productName) {
         return prices.getOrDefault(productName, 0.0);
+    }
+
+    public boolean hasPrice(String productName) {
+        return prices.containsKey(productName);
     }
 }

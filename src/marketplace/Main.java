@@ -6,9 +6,12 @@ import visitor.ProductFilterVisitor;
 import visitor.XmlExportVisitor;
 import observer.*;
 import listener.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         PhysicalProduct phone = new PhysicalProduct("Phone", 1000, 0.5);
         DigitalProduct game = new DigitalProduct("Game", 50);
         ServiceProduct installation = new ServiceProduct("Installation", 30);
@@ -93,5 +96,42 @@ public class Main {
 
         stockService.setStock("Phone", 10);
         stockService.setStock("Phone", 5);
+
+        System.out.println("--- Concurrency ---");
+
+        EventPublisher stressPublisher = new EventPublisher();
+        AnalyticsListener stressAnalytics = new AnalyticsListener();
+        stressPublisher.subscribe(EventType.STOCK_CHANGED, stressAnalytics);
+        StockService stressStock = new StockService(stressPublisher);
+
+        int threadCount = 4;
+        int eventsPerThread = 1000;
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+
+        for (int thread = 0; thread < threadCount; thread++) {
+            final int threadId = thread;
+            executor.submit(() -> {
+                String productName = "Product-" + threadId;
+
+                stressStock.setStock(productName, 0);
+
+                for (int i = 1; i <= eventsPerThread; i++) {
+                    stressStock.setStock(productName, i);
+                }
+            });
+        }
+        executor.shutdown();
+
+        if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
+            executor.shutdownNow();
+            throw new IllegalStateException("Tasks did not finish");
+        }
+        System.out.println(
+                "Expected events: " + (threadCount * eventsPerThread)
+        );
+        System.out.println(
+                "Actual events: " + stressAnalytics.getEventCount()
+        );
+
     }
 }

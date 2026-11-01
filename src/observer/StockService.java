@@ -1,7 +1,7 @@
 package observer;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class StockService {
     private final EventPublisher publisher;
@@ -15,14 +15,18 @@ public class StockService {
         if (newStock < 0) {
             throw new IllegalArgumentException("Stock cannot be negative");
         }
-        Integer oldStock = stocks.put(productName, newStock);
+        final Integer[] previous = new Integer[1];
+        stocks.compute(productName, (name, oldStock) -> {
+            previous[0] = oldStock;
+            return newStock;
+        });
 
-        if (oldStock != null && oldStock != newStock) {
+        if (previous[0] != null && previous[0] != newStock) {
             publisher.notifyObservers(
                     new Event(
                             EventType.STOCK_CHANGED,
                             productName,
-                            oldStock,
+                            previous[0],
                             newStock
                     )
             );
