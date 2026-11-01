@@ -1,5 +1,9 @@
 package marketplace;
 import java.util.List;
+import visitor.TaxVisitor;
+import visitor.ShippingVisitor;
+import visitor.ProductFilterVisitor;
+import visitor.XmlExportVisitor;
 
 public class Main {
     public static void main(String[] args) {
@@ -27,5 +31,20 @@ public class Main {
         System.out.println(
                 catalog.getCategories().get(0).getName()
         );
+
+        TaxVisitor taxVisitor = new TaxVisitor();
+        System.out.println("Total tax: " + catalog.accept(taxVisitor));
+
+        ShippingVisitor shippingVisitor = new ShippingVisitor();
+        System.out.println("Total shipping: " + catalog.accept(shippingVisitor)
+        );
+
+        ProductFilterVisitor filterVisitor = new ProductFilterVisitor(100);
+        System.out.println("Products under $100: " + catalog.accept(filterVisitor)
+        );
+
+        XmlExportVisitor xmlVisitor = new XmlExportVisitor();
+        System.out.println("XML Export:");
+        System.out.println(catalog.accept(xmlVisitor));
     }
 }
